@@ -1,7 +1,7 @@
 from google import genai
 
 client = genai.Client(
-    api_key="AIzaSyBL1JEYgWn2QBvoy5M1-4ToUx9taQ0JRn0"
+    api_key="######"
 )
 
 response = client.models.generate_content(
