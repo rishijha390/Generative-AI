@@ -5,8 +5,8 @@ from openai import OpenAI
 load_dotenv()
 
 client = OpenAI(
-    api_key = "AIzaSyBL1JEYgWn2QBvoy5M1-4ToUx9taQ0JRn0",
-    base_url="https://generativelanguage.googleapis.com/v1beta/"
+    api_key = "##",
+    base_url="##"
 )
 # directly giving instruction to the model is termed as zero short prompting
 SYSTEM_PROMPT = """
