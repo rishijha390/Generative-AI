@@ -1,3 +1,4 @@
+import os
 import json
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -5,9 +6,13 @@ from openai import OpenAI
 
 load_dotenv()
 
+# client = OpenAI(
+#       api_key = "AIzaSyBL1JEYgWn2QBvoy5M1-4ToUx9taQ0JRn0",
+#       base_url="https://generativelanguage.googleapis.com/v1beta/"
+# )
 client = OpenAI(
-    api_key = "AIzaSyBL1JEYgWn2QBvoy5M1-4ToUx9taQ0JRn0",
-    base_url="https://generativelanguage.googleapis.com/v1beta/"
+    api_key=os.getenv("OPENAI_API_KEY"),
+    base_url=os.getenv("OPENAI_BASE_URL")
 )
 
 SYSTEM_PROMPT = """
@@ -35,15 +40,46 @@ SYSTEM_PROMPT = """
     OUTPUT: {"step": "OUTPUT": "content": "The answer is 3.5"}
 
  """
-response = client.chat.completions.create(
+
+message_history = [
+    { "role": "system" , "content": SYSTEM_PROMPT },
+]
+
+user_query = input("👉 ")
+message_history.append({ "role": "user" , "content": user_query })
+
+while True:
+    response = client.chat.completions.create(
     model="gemini-2.5-flash",
     response_format={"type": "json_object"},
-    messages=[
-        {"role": "system", "content": SYSTEM_PROMPT},
-        { "role": "user", "content" : "Hey,write a code to add n numbers in javascript" },
-        { "role": "assistant", "content": json.dumps({"step": "START", "content": "You want a JavaScript code to add 'n' numbers." })},
-        { "role": "assistant", "content": json.dumps({"step": "PLAN", "content": "To add 'n' numbers in JavaScript, I will define a function that accepts an arbitrary number of arguments using the rest parameter syntax. Inside the function, I will use the `reduce` array method to sum all the provided numbers. I will then provide the JavaScript code snippet." })}
-    ]
-)
+    messages=message_history    
+    )
 
-print(response.choices[0].message.content)
+    raw_result = (response.choices[0].message.content)
+    message_history.append({"role": "assistant" , "content": raw_result})
+    parsed_result = json.loads(raw_result)
+
+    if parsed_result.get("step") == "START":
+        print("🔥", parsed_result.get("content"))
+        continue
+
+    if parsed_result.get("step") == "PLAN":
+        print("🧠", parsed_result.get("content"))
+        continue
+
+    if parsed_result.get("step") == "OUTPUT":
+        print("💡", parsed_result.get("content"))
+        break
+     
+# response = client.chat.completions.create(
+#     model="gemini-2.5-flash",
+#     response_format={"type": "json_object"},
+#     messages=[
+#         {"role": "system", "content": SYSTEM_PROMPT},
+#         { "role": "user", "content" : "Hey,write a code to add n numbers in javascript" },
+#         { "role": "assistant", "content": json.dumps({"step": "START", "content": "You want a JavaScript code to add 'n' numbers." })},
+#         { "role": "assistant", "content": json.dumps({"step": "PLAN", "content": "To add 'n' numbers in JavaScript, I will define a function that accepts an arbitrary number of arguments using the rest parameter syntax. Inside the function, I will use the `reduce` array method to sum all the provided numbers. I will then provide the JavaScript code snippet." })}
+#     ]
+# )
+
+# print(response.choices[0].message.content)
